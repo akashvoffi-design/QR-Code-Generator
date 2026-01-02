@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qlink</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15), inset 0 0 20px rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 45px;
+            max-width: 550px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 35px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        input[type="text"],
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #2563eb;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: rgba(37, 99, 235, 0.05);
+            backdrop-filter: blur(10px);
+            color: #333;
+        }
+        
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.6);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+            display: none;
+        }
+        
+        .download-btn.active {
+            display: flex;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.6);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+        
+        .download-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+            display: none;
+        }
+        
+        .copy-btn.active {
+            display: flex;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.6);
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .clear-btn {
+            display: none;
+        }
+        
+        .qr-output {
+            text-align: center;
+            margin-top: 35px;
+            padding-top: 30px;
+            border-top: 2px solid rgba(102, 126, 234, 0.2);
+            display: none;
+        }
+        
+        .qr-output.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .qr-output h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+        }
+        
+        .error {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .error.show {
+            display: block;
+            animation: shake 0.3s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Share Modal */
+        .share-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .share-modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .share-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 35px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .share-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .share-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .share-option {
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+
+        .share-option:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            transform: translateX(5px);
+        }
+
+        .close-share {
+            background: rgba(245, 101, 101, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .close-share:hover {
+            background: rgba(229, 62, 62, 0.9);
+        }
+
+        .logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo i {
+            font-size: 28px;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo"><i class="fas fa-qrcode"></i>Qlink</div>
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        
+        <div class="form-group">
+            <label for="dataInput">Enter URL:</label>
+            <input 
+                type="text" 
+                id="dataInput" 
+                placeholder="URL/Link"
+            >
+            <div class="error" id="error"></div>
+        </div>
+        
+        <div class="button-group">
+            <button class="generate-btn" onclick="generateQR()">
+                <i class="fas fa-qrcode"></i> Generate
+            </button>
+            <button class="download-btn" id="downloadBtn" onclick="downloadQR()">
+                <i class="fas fa-download"></i> Download
+            </button>
+            <button class="copy-btn" id="copyBtn" onclick="copyQRToClipboard()">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+            <button class="clear-btn" onclick="clearAll()">
+                <i class="fas fa-trash"></i> Clear
+            </button>
+        </div>
+        
+        <div class="qr-output" id="qrOutput">
+            <h3>Your QR Code:</h3>
+            <div id="qrcode"></div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div class="share-modal" id="shareModal">
+        <div class="share-content">
+            <h2>Share QR Code</h2>
+            <div class="share-options">
+                <button class="share-option" onclick="downloadQR()">
+                    <i class="fas fa-download"></i> Download QR Image
+                </button>
+                <button class="share-option" onclick="copyQRToClipboard()">
+                    <i class="fas fa-copy"></i> Copy QR Image
+                </button>
+                <button class="share-option" onclick="shareQRViaEmail()">
+                    <i class="fas fa-envelope"></i> Email QR Image
+                </button>
+                <button class="share-option" onclick="shareQRViaWhatsApp()">
+                    <i class="fab fa-whatsapp"></i> WhatsApp QR Image
+                </button>
+            </div>
+            <button class="close-share" onclick="closeShareModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let qrInstance = null;
+        let qrData = '';
+
+        function generateQR() {
+            const input = document.getElementById('dataInput').value.trim();
+            const errorEl = document.getElementById('error');
+            const qrOutput = document.getElementById('qrOutput');
+            
+            errorEl.classList.remove('show');
+            
+            if (!input) {
+                errorEl.textContent = 'Please enter some text or URL';
+                errorEl.classList.add('show');
+                qrOutput.classList.remove('active');
+                return;
+            }
+            
+            qrData = input;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
+            
+            const size = 100;
+            
+            qrInstance = new QRCode(qrContainer, {
+                text: input,
+                width: size,
+                height: size,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            qrOutput.classList.add('active');
+            document.getElementById('downloadBtn').classList.add('active');
+            document.getElementById('copyBtn').classList.add('active');
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) return;
+            
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'qrcode.png';
+            link.click();
+        }
+
+        function openShareModal() {
+            document.getElementById('shareModal').classList.add('active');
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').classList.remove('active');
+        }
+
+        function copyQRToClipboard() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) return;
+            
+            canvas.toBlob(function(blob) {
+                navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]).then(() => {
+                    alert('QR Code copied to clipboard!');
+                    closeShareModal();
+                }).catch(() => {
+                    alert('Failed to copy QR Code');
+                });
+            });
+        }
+
+        function shareViaEmail() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                qrCanvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const subject = 'Check out my QR Code';
+                    const body = 'I generated a QR Code for you!';
+                    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+                    closeShareModal();
+                });
+            }
+        }
+
+        function shareQRViaEmail() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                const imageData = qrCanvas.toDataURL('image/png');
+                const subject = 'Check out my QR Code';
+                const body = 'I generated this QR Code with Qlink. Here is the image:';
+                window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+                closeShareModal();
+            } else {
+                alert('Please generate a QR code first');
+            }
+        }
+
+        function shareQRViaWhatsApp() {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            if (qrCanvas) {
+                qrCanvas.toBlob(blob => {
+                    const file = new File([blob], 'qrcode.png', { type: 'image/png' });
+                    if (navigator.share) {
+                        navigator.share({
+                            files: [file],
+                            title: 'QR Code',
+                            text: 'Check out this QR Code generated with Qlink!'
+                        }).catch(err => {
+                            const imageData = qrCanvas.toDataURL('image/png');
+                            window.open(`https://wa.me/?text=${encodeURIComponent('Check out this QR Code! Generated with Qlink')}`);
+                        });
+                    } else {
+                        window.open(`https://wa.me/?text=${encodeURIComponent('Check out this QR Code! Generated with Qlink')}`);
+                    }
+                    closeShareModal();
+                });
+            } else {
+                alert('Please generate a QR code first');
+            }
+        }
+
+        function shareViaWhatsApp() {
+            const message = `Check out this QR Code! It contains: ${qrData}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+            closeShareModal();
+        }
+
+        function shareViaFacebook() {
+            const url = window.location.href;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`);
+            closeShareModal();
+        }
+
+        function clearAll() {
+            document.getElementById('dataInput').value = '';
+            document.getElementById('qrcode').innerHTML = '';
+            document.getElementById('qrOutput').classList.remove('active');
+            document.getElementById('downloadBtn').classList.remove('active');
+            document.getElementById('copyBtn').classList.remove('active');
+            document.getElementById('error').classList.remove('show');
+            qrInstance = null;
+            qrData = '';
+        }
+
+        // Generate QR on Enter key
+        document.getElementById('dataInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateQR();
+            }
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('shareModal');
+            if (event.target === modal) {
+                closeShareModal();
+            }
+        }
+    </script>
+</body>
+</html>
